@@ -30,3 +30,24 @@ psql "$DATABASE_URL" -f database/002_seed_deals.sql
 ```
 
 The client expects the server at `http://localhost:5000` in development.
+
+## Desktop app (downloadable)
+
+DealSight can be packaged as a self-contained desktop application (Electron) that bundles the
+React client and the Express API into a single installable file.
+
+```bash
+# Run the desktop app locally (builds the client, then launches Electron)
+npm run desktop
+
+# Build downloadable installers into ./release
+npm run dist        # platform installer (Linux: AppImage)
+npm run dist:dir    # unpacked build only (no installer)
+```
+
+`npm run dist` produces `release/DealSight-<version>.AppImage` on Linux — a single downloadable file
+that launches the full app (client + API) with no separate server to start.
+
+The desktop build starts the bundled API with `SERVE_CLIENT=1`, so the Express server also serves the
+built client and all relative `/api` calls share one origin. The Deal Board still needs a reachable
+`DATABASE_URL` (defaults to the local dev Postgres); all other screens work without it.

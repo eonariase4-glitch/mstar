@@ -16,9 +16,10 @@ not obvious from those files:
 - Health check: `curl http://localhost:5000/api/health`.
 
 ### PostgreSQL (required for the Deal Board / `/api/deals`)
-- PostgreSQL is installed but **not auto-started**. Start it each session before running the API:
-  `sudo pg_ctlcluster 16 main start`
-- Dev DB: role `user` / password `password`, database `dealsight`, matching
+- If PostgreSQL is installed in the environment, start it before testing deal endpoints. Some cloud snapshots do
+  not include `pg_isready`, `psql`, or `pg_ctlcluster`; in that case, SQL migrations can only be syntax-reviewed
+  unless the tools are installed first.
+- Default dev DB: role `user` / password `password`, database `dealsight`, matching
   `DATABASE_URL=postgres://user:password@localhost:5432/dealsight` in `dealsight/.env`.
 - `dealsight/.env` is local-only (gitignored). If missing, recreate it from `dealsight/.env.example`.
 - The server boots even if Postgres is down; deal endpoints only fail at query time.
@@ -38,25 +39,14 @@ not obvious from those files:
 - In containers, run Electron/AppImage with `--no-sandbox` (and AppImage with `--appimage-extract-and-run` when
   FUSE is unavailable).
 
-### Known caveat
-- `database/002_seed_deals.sql` fails on the `deals` insert (`jsonb` vs `text` in the `UNION ALL` SELECT), so the
-  Deal Board starts empty server-side. The schema (`001_schema.sql`) and the create-deal API both work; create
-  deals via `POST /api/deals` instead of relying on the seed. (Note: the current `DealBoard.jsx` renders local
-  demo cards and does not yet read `/api/deals`.)
-
 ### Lint / Test / Build
 - **No lint or test tooling is configured** (no ESLint/Prettier, no test runner).
-- The dev DB role/database already exist in the snapshot: role `user` / password `password`, database `dealsight`,
-  matching `DATABASE_URL=postgres://user:password@localhost:5432/dealsight` in `dealsight/.env`.
+- The default dev DB config is role `user` / password `password`, database `dealsight`, matching
+  `DATABASE_URL=postgres://user:password@localhost:5432/dealsight` in `dealsight/.env`.
 - `dealsight/.env` is local-only (gitignored). If missing, recreate it from `dealsight/.env.example` and set
   the `DATABASE_URL` above.
 - The server boots even if Postgres is down; deal endpoints only fail at query time, so verify Postgres is running
   when `/api/deals` errors.
-
-### Known caveat
-- `database/002_seed_deals.sql` fails on the `deals` insert (`jsonb` vs `text` in the `UNION ALL` SELECT), so the
-  Deal Board starts empty. The schema (`001_schema.sql`) and the create-deal API both work; create deals via the
-  app or `POST /api/deals` instead of relying on the seed.
 
 ### Lint / Test / Build
 - **No lint or test tooling is configured** (no ESLint/Prettier, no test runner). There is nothing to run.

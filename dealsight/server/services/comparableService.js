@@ -1,7 +1,13 @@
 import axios from 'axios';
+import { extractPostcode } from './postcode.js';
 
 export const fetchSoldData = async (postcode) => {
-  const normalizedPostcode = postcode.toUpperCase();
+  const normalizedPostcode = extractPostcode(postcode);
+
+  if (!normalizedPostcode) {
+    return [];
+  }
+
   const query = `
     PREFIX ppd: <http://landregistry.data.gov.uk/def/ppi/>
     PREFIX lrcommon: <http://landregistry.data.gov.uk/def/common/>
@@ -23,30 +29,37 @@ export const fetchSoldData = async (postcode) => {
   `;
 
   const url = `https://landregistry.data.gov.uk/landregistry/query?query=${encodeURIComponent(query)}&output=json`;
-  const response = await axios.get(url);
 
-  return response.data.results.bindings.map((item) => ({
-    price: Number(item.amount.value),
-    date: new Date(item.date.value).toLocaleDateString('en-GB', { year: 'numeric', month: 'short' }),
-    type: item.propertyType?.value || 'Unknown',
-    address: `${item.saon?.value || ''} ${item.paon?.value || ''} ${item.street?.value || ''}`.trim(),
-  }));
+  try {
+    const response = await axios.get(url, { timeout: 10000 });
+
+    return response.data.results.bindings.map((item) => ({
+      price: Number(item.amount.value),
+      date: new Date(item.date.value).toLocaleDateString('en-GB', { year: 'numeric', month: 'short' }),
+      type: item.propertyType?.value || 'Unknown',
+      address: `${item.saon?.value || ''} ${item.paon?.value || ''} ${item.street?.value || ''}`.trim(),
+    }));
+  } catch (error) {
+    console.error('Land Registry comparable lookup failed:', error.message);
+    return [];
+  }
 };
 
 export const calculateCompsMetrics = (data) => {
-  if (!data.length) return null;
+  const validData = data.filter((item) => Number.isFinite(item.price));
+  if (!validData.length) return null;
 
-  const prices = data.map((item) => item.price).sort((a, b) => a - b);
+  const prices = validData.map((item) => item.price).sort((a, b) => a - b);
   const average = prices.reduce((sum, price) => sum + price, 0) / prices.length;
   const median = prices[Math.floor(prices.length / 2)];
-  const confidence = Math.min((data.length / 20) * 100, 100);
+  const confidence = Math.min((validData.length / 20) * 100, 100);
 
   return {
     average,
     median,
     min: prices[0],
     max: prices[prices.length - 1],
-    count: data.length,
+    count: validData.length,
     confidenceScore: Math.round(confidence),
   };
 };

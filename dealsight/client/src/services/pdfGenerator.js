@@ -1,5 +1,5 @@
 import { jsPDF } from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 
 export const generateDealReport = (dealData, calculations) => {
   const doc = new jsPDF();
@@ -20,7 +20,7 @@ export const generateDealReport = (dealData, calculations) => {
   doc.setFontSize(10);
   doc.text(dealData.address || '', 20, 62);
 
-  doc.autoTable({
+  autoTable(doc, {
     startY: 75,
     head: [['Metric', 'Value']],
     body: [

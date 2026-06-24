@@ -44,8 +44,6 @@
       "package.json"
     ],
     "linux": {
-      "desktopName": "DealSight",
-      "syncDesktopName": true,
       "target": [
         "AppImage"
       ],

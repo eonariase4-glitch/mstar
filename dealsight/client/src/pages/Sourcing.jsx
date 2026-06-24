@@ -90,14 +90,20 @@ const Sourcing = () => {
                 <button className="rounded bg-slate-800 px-3 text-amber-500 transition-colors hover:bg-amber-500 hover:text-slate-950">
                   <PlusCircle size={18} />
                 </button>
-                <a
-                  href={property.url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="rounded bg-slate-800 px-3 py-2 text-slate-400"
-                >
-                  <ExternalLink size={14} />
-                </a>
+                {property.url ? (
+                  <a
+                    href={property.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="rounded bg-slate-800 px-3 py-2 text-slate-400"
+                  >
+                    <ExternalLink size={14} />
+                  </a>
+                ) : (
+                  <span className="rounded bg-slate-800 px-3 py-2 text-slate-600" aria-label="No listing URL">
+                    <ExternalLink size={14} />
+                  </span>
+                )}
               </div>
             </div>
           </div>

@@ -1,7 +1,13 @@
 import axios from 'axios';
+import { extractPostcode } from './postcode.js';
 
 export const fetchComparables = async (postcode) => {
-  const normalizedPostcode = postcode.toUpperCase();
+  const normalizedPostcode = extractPostcode(postcode);
+
+  if (!normalizedPostcode) {
+    return [];
+  }
+
   const query = `
     PREFIX ppd: <http://landregistry.data.gov.uk/def/ppi/>
     PREFIX lrcommon: <http://landregistry.data.gov.uk/def/common/>
@@ -21,7 +27,7 @@ export const fetchComparables = async (postcode) => {
   const url = `https://landregistry.data.gov.uk/landregistry/query?query=${encodeURIComponent(query)}&output=json`;
 
   try {
-    const response = await axios.get(url);
+    const response = await axios.get(url, { timeout: 10000 });
     return response.data.results.bindings.map((item) => ({
       price: Number(item.amount.value),
       date: item.date.value,

@@ -1,18 +1,8 @@
 import puppeteer from 'puppeteer';
-
-const UK_POSTCODE_PATTERN = /\b[A-Z]{1,2}\d[A-Z\d]?\s*\d[A-Z]{2}\b/i;
-
-export const extractPostcode = (value = '') => {
-  const match = String(value).match(UK_POSTCODE_PATTERN);
-  if (!match) return null;
-
-  const compact = match[0].toUpperCase().replace(/\s+/g, '');
-  return `${compact.slice(0, -3)} ${compact.slice(-3)}`;
-};
+export { extractPostcode } from './postcode.js';
 
 export const scrapeRightmove = async (location, minPrice, maxPrice) => {
-  const browser = await puppeteer.launch({ headless: 'new' });
-  const page = await browser.newPage();
+  let browser;
   const params = new URLSearchParams({
     searchLocation: location || '',
     minPrice: minPrice || '',
@@ -22,10 +12,16 @@ export const scrapeRightmove = async (location, minPrice, maxPrice) => {
   const searchUrl = `https://www.rightmove.co.uk/property-for-sale/find.html?${params.toString()}`;
 
   try {
+    browser = await puppeteer.launch({
+      headless: 'new',
+      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    });
+    const page = await browser.newPage();
+
     await page.setUserAgent(
       'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36',
     );
-    await page.goto(searchUrl, { waitUntil: 'domcontentloaded' });
+    await page.goto(searchUrl, { waitUntil: 'domcontentloaded', timeout: 30000 });
 
     return await page.evaluate(() => {
       const cards = document.querySelectorAll('.l-searchResult');
@@ -46,7 +42,10 @@ export const scrapeRightmove = async (location, minPrice, maxPrice) => {
         })
         .filter((property) => property.title || property.address);
     });
+  } catch (error) {
+    console.error('Rightmove scrape failed:', error.message);
+    return [];
   } finally {
-    await browser.close();
+    await browser?.close();
   }
 };

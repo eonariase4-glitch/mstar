@@ -1,3 +1,5 @@
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import express from 'express';
@@ -8,6 +10,8 @@ import savedDealsRoutes from './routes/savedDeals.js';
 import searchRoutes from './routes/search.js';
 
 dotenv.config();
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -28,6 +32,16 @@ app.use('/api/comparables', comparablesRoutes);
 app.use('/api/deals', savedDealsRoutes);
 app.use('/api/refurb', refurbRoutes);
 app.use('/api/ai', aiRoutes);
+
+// When packaged as a desktop app the API also serves the built client so that
+// the SPA and its relative `/api` calls share a single origin.
+if (process.env.SERVE_CLIENT === '1') {
+  const clientDist = process.env.CLIENT_DIST || path.resolve(__dirname, '../client/dist');
+  app.use(express.static(clientDist));
+  app.get(/^(?!\/api).*/, (_req, res) => {
+    res.sendFile(path.join(clientDist, 'index.html'));
+  });
+}
 
 app.use((err, _req, res, _next) => {
   console.error(err);

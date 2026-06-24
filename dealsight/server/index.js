@@ -1,54 +1,10 @@
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
-import cors from 'cors';
 import dotenv from 'dotenv';
-import express from 'express';
-import aiRoutes from './routes/ai.js';
-import comparablesRoutes from './routes/comparables.js';
-import refurbRoutes from './routes/refurb.js';
-import savedDealsRoutes from './routes/savedDeals.js';
-import searchRoutes from './routes/search.js';
+import { createApp } from './app.js';
 
 dotenv.config();
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-
-const app = express();
+const app = createApp();
 const port = process.env.PORT || 5000;
-
-app.use(
-  cors({
-    origin: process.env.CLIENT_ORIGIN || 'http://localhost:5173',
-  }),
-);
-app.use(express.json({ limit: '1mb' }));
-
-app.get('/api/health', (_req, res) => {
-  res.json({ ok: true, service: 'dealsight-api' });
-});
-
-app.use('/api/scrape', searchRoutes);
-app.use('/api/comparables', comparablesRoutes);
-app.use('/api/deals', savedDealsRoutes);
-app.use('/api/refurb', refurbRoutes);
-app.use('/api/ai', aiRoutes);
-
-// When packaged as a desktop app the API also serves the built client so that
-// the SPA and its relative `/api` calls share a single origin.
-if (process.env.SERVE_CLIENT === '1') {
-  const clientDist = process.env.CLIENT_DIST || path.resolve(__dirname, '../client/dist');
-  app.use(express.static(clientDist));
-  app.get(/^(?!\/api).*/, (_req, res) => {
-    res.sendFile(path.join(clientDist, 'index.html'));
-  });
-}
-
-app.use((err, _req, res, _next) => {
-  console.error(err);
-  res.status(err.status || 500).json({
-    error: err.message || 'Internal server error',
-  });
-});
 
 app.listen(port, () => {
   console.log(`DealSight API listening on port ${port}`);

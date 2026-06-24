@@ -37,12 +37,15 @@ DealSight can be packaged as a self-contained desktop application (Electron) tha
 React client and the Express API into a single installable file.
 
 ```bash
-# Run the desktop app locally (builds the client, then launches Electron)
+# Run the desktop app locally (builds the client, then launches Electron).
 npm run desktop
+npm run desktop:preview
 
-# Build downloadable installers into ./release
-npm run dist        # platform installer (Linux: AppImage)
-npm run dist:dir    # unpacked build only (no installer)
+# Build downloadable artifacts into ./release.
+npm run desktop:build  # Linux AppImage
+npm run desktop:dir    # unpacked Linux build only
+npm run dist           # platform installer
+npm run dist:dir       # unpacked build only
 ```
 
 `npm run dist` produces `release/DealSight-<version>.AppImage` on Linux — a single downloadable file

@@ -1,10 +1,14 @@
 import cors from 'cors';
 import express from 'express';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import aiRoutes from './routes/ai.js';
 import comparablesRoutes from './routes/comparables.js';
 import refurbRoutes from './routes/refurb.js';
 import savedDealsRoutes from './routes/savedDeals.js';
 import searchRoutes from './routes/search.js';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const isAllowedOrigin = (origin) => {
   if (!origin || origin === 'null' || origin.startsWith('file://')) return true;
@@ -39,6 +43,14 @@ export const createApp = () => {
   app.use('/api/deals', savedDealsRoutes);
   app.use('/api/refurb', refurbRoutes);
   app.use('/api/ai', aiRoutes);
+
+  if (process.env.SERVE_CLIENT === '1') {
+    const clientDist = process.env.CLIENT_DIST || path.resolve(__dirname, '../client/dist');
+    app.use(express.static(clientDist));
+    app.get(/^(?!\/api).*/, (_req, res) => {
+      res.sendFile(path.join(clientDist, 'index.html'));
+    });
+  }
 
   app.use((err, _req, res, _next) => {
     console.error(err);

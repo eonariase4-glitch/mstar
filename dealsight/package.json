@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "description": "DealSight UK property intelligence starter project.",
+  "main": "desktop/main.cjs",
   "workspaces": [
     "client",
     "server"
@@ -10,6 +11,47 @@
   "scripts": {
     "dev": "npm run dev --workspace client & npm run dev --workspace server",
     "build": "npm run build --workspace client",
-    "start": "npm run start --workspace server"
+    "start": "npm run start --workspace server",
+    "desktop": "npm run build && electron .",
+    "desktop:start": "electron .",
+    "dist": "npm run build && electron-builder",
+    "dist:dir": "npm run build && electron-builder --dir"
+  },
+  "dependencies": {
+    "axios": "^1.18.1",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "openai": "^6.44.0",
+    "pg": "^8.22.0",
+    "puppeteer": "^25.2.0"
+  },
+  "devDependencies": {
+    "electron": "^33.2.0",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "com.dealsight.app",
+    "productName": "DealSight",
+    "asar": false,
+    "extraMetadata": {
+      "main": "desktop/main.cjs"
+    },
+    "files": [
+      "desktop/**/*",
+      "server/**/*",
+      "client/dist/**/*",
+      "package.json"
+    ],
+    "directories": {
+      "output": "release"
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "dir"
+      ],
+      "category": "Office"
+    }
   }
 }

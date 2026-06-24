@@ -30,3 +30,15 @@ psql "$DATABASE_URL" -f database/002_seed_deals.sql
 ```
 
 The client expects the server at `http://localhost:5000` in development.
+
+## Desktop App
+
+DealSight can be packaged as a downloadable Electron desktop app. The packaged
+app starts the Express API locally and points the React renderer at it.
+
+```bash
+npm run desktop:preview
+npm run desktop:build
+```
+
+The Linux AppImage is written to `release/`.

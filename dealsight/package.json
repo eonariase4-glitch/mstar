@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "description": "DealSight UK property intelligence starter project.",
+  "author": "DealSight",
   "main": "desktop/main.js",
   "workspaces": [
     "client",
@@ -43,6 +44,8 @@
       "package.json"
     ],
     "linux": {
+      "desktopName": "DealSight",
+      "syncDesktopName": true,
       "target": [
         "AppImage"
       ],

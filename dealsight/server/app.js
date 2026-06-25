@@ -16,7 +16,11 @@ const isAllowedOrigin = (origin) => {
 
   try {
     const { hostname } = new URL(origin);
-    return hostname === 'localhost' || hostname === '127.0.0.1';
+    if (hostname === 'localhost' || hostname === '127.0.0.1') return true;
+    // When the API and the client share one origin in a hosted deployment, allow
+    // the app's own public hostname (Render injects RENDER_EXTERNAL_HOSTNAME).
+    if (process.env.RENDER_EXTERNAL_HOSTNAME && hostname === process.env.RENDER_EXTERNAL_HOSTNAME) return true;
+    return false;
   } catch {
     return false;
   }

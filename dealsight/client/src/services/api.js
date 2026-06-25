@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 export const api = axios.create({
-  baseURL: '/api',
+  baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
 });
 
 export const searchRightmove = (params) => api.post('/scrape/rightmove', params).then((response) => response.data);

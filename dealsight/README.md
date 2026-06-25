@@ -31,6 +31,22 @@ psql "$DATABASE_URL" -f database/002_seed_deals.sql
 
 The client expects the server at `http://localhost:5000` in development.
 
+## Web deployment (GitHub Pages)
+
+The repository includes a GitHub Actions workflow at `.github/workflows/deploy-web.yml`.
+It deploys the Vite web client to GitHub Pages on pushes to `main` and can also be
+started manually from the Actions tab.
+
+The workflow builds the app for the repository path:
+
+```bash
+VITE_BASE_PATH=/mstar/ npm run build
+```
+
+If the static Pages app should call a deployed API, set the repository variable
+`DEALSIGHT_API_BASE_URL` to that backend's `/api` URL. If it is unset, the client
+uses relative `/api` calls, which is correct for local development and desktop builds.
+
 ## Desktop app (downloadable)
 
 DealSight can be packaged as a self-contained desktop application (Electron) that bundles the

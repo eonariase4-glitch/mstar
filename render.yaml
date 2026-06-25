@@ -1,0 +1,42 @@
+# Render Blueprint for DealSight.
+#
+# One free web service that builds the React client and serves it together with
+# the Express API from a single origin (SERVE_CLIENT=1), so the client's
+# relative "/api" calls work with no CORS or cross-origin configuration.
+#
+# The PostgreSQL database is hosted externally on Supabase. When Render applies
+# this blueprint it will prompt for DATABASE_URL and OPENAI_API_KEY (both marked
+# sync:false, so secrets are never committed to git).
+services:
+  - type: web
+    name: dealsight
+    runtime: node
+    plan: free
+    rootDir: dealsight
+    buildCommand: npm install --include=dev && npm run build
+    startCommand: npm run start
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: SERVE_CLIENT
+        value: "1"
+      # Skip Puppeteer's bundled Chromium download (~150MB). Render's free native
+      # runtime cannot launch headless Chrome anyway, so live Rightmove scraping
+      # returns an empty list (handled gracefully in code). Remove this only on a
+      # Docker-based plan that bundles Chromium and its system libraries.
+      - key: PUPPETEER_SKIP_DOWNLOAD
+        value: "true"
+      # The repo lists Electron as a dev dependency for the optional desktop
+      # build; skip its binary download so the web build stays fast.
+      - key: ELECTRON_SKIP_BINARY_DOWNLOAD
+        value: "1"
+      # Paste your Supabase "Connection pooling" URI (Transaction or Session
+      # pooler) when prompted. The direct db.<ref>.supabase.co host is IPv6-only
+      # and will NOT connect from Render; the pooler host is IPv4.
+      - key: DATABASE_URL
+        sync: false
+      # Your OpenAI API key, for the AI refurb-cost estimator.
+      - key: OPENAI_API_KEY
+        sync: false

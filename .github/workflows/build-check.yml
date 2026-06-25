@@ -1,0 +1,29 @@
+name: Build check
+
+# Verifies that the DealSight client compiles with the same settings Render uses
+# to deploy it. Runs on every push to main and can be triggered by hand.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: dealsight
+    env:
+      PUPPETEER_SKIP_DOWNLOAD: "true"
+      ELECTRON_SKIP_BINARY_DOWNLOAD: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install dependencies
+        run: npm install --include=dev
+      - name: Build client
+        run: npm run build
+      - name: Confirm build output exists
+        run: test -f client/dist/index.html && echo "client/dist/index.html present"
